@@ -52,7 +52,6 @@ public static class TableMenuManager
                 Console.ReadKey();
                 break;
             case 4:
-
                 // THIS ONE IS REMAINING TO BE IMPLEMENTED
 
                 Console.WriteLine("\nPresione cualquier tecla para continuar.");
@@ -81,7 +80,7 @@ public static class TableMenuManager
         using (var context = new ApplicationDbContext())
         {
             tableRepository = new TableRepository(context);
-            table = tableRepository.GetTableById(selectedTable);
+            table = tableRepository.GetTableByIdWithProducts(selectedTable);
         }
 
         if (table == null)

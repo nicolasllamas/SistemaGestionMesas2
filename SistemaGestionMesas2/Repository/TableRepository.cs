@@ -28,6 +28,12 @@ namespace SistemaGestionMesas2.Repository
         {
             return _context.Table.Find(id);
         }
+        public Table GetTableByIdWithProducts(int id)
+        {
+            return _context.Table
+                .Include(t => t.TableProducts)
+                .FirstOrDefault(t => t.Id == id);
+        }
 
         public void AddTable() // Create a new table
         {
