@@ -7,7 +7,7 @@ internal static class ProductMenuManager
 {
     public static void DeleteProductOrMenu()
     {
-        Console.Write("Indique el ID del producto:");
+        Console.Write("Indique el ID del producto: ");
         int selection = InputHelper.GetValidInt(1);
 
         using (var context = new ApplicationDbContext())
@@ -56,14 +56,13 @@ internal static class ProductMenuManager
     }
     public static void ManageAddingMenu()
     {
-        Console.Write("Indique el nombre:");
-        string nameNewMenu = null;
-        while (nameNewMenu == null) { nameNewMenu = Console.ReadLine(); }
+        Console.Write("Indique el nombre: ");
+        string nameNewMenu = InputHelper.GetNotNullString();
 
-        Console.Write("Indique el precio:");
+        Console.Write($"Indique el precio (use \",\" para indicar decimales): ");
         decimal priceNewMenu = InputHelper.GetPositiveDecimal();
 
-        Console.Write("Indique el tiempo de cocción (min):");
+        Console.Write("Indique el tiempo de cocción (min): ");
         int timeCooking = InputHelper.GetValidInt(1);
 
         using (var context = new ApplicationDbContext())
@@ -71,13 +70,13 @@ internal static class ProductMenuManager
             var menuRepository = new MenuRepository(context);
             menuRepository.AddMenu(nameNewMenu, priceNewMenu, timeCooking);
         }
-        Console.Write("El menú ha sido agregado.");
+        Console.WriteLine("El menú ha sido agregado.");
     }
     public static void ManageAddingProduct()
     {
-        Console.Write("Indique el nombre:");
-        string nameNewProduct = Console.ReadLine();
-        Console.Write("Indique el precio:");
+        Console.Write("Indique el nombre: ");
+        string nameNewProduct = InputHelper.GetNotNullString();
+        Console.Write("Indique el precio (use \",\" para indicar decimales): ");
         decimal priceNewProduct = InputHelper.GetPositiveDecimal();
 
         using (var context = new ApplicationDbContext())
@@ -86,7 +85,7 @@ internal static class ProductMenuManager
             productRepository.AddProduct(nameNewProduct, priceNewProduct);
         }
 
-        Console.Write("El producto ha sido agregado.");
+        Console.WriteLine("El producto ha sido agregado.");
     }
 
     public static bool ManageProduct()
@@ -145,7 +144,7 @@ internal static class ProductMenuManager
     }
     public static void ModifyProductOrMenu()
     {
-        Console.Write("Indique el ID del producto:");
+        Console.Write("Indique el ID del producto: ");
         int selection = InputHelper.GetValidInt(1);
 
         using (var context = new ApplicationDbContext())
@@ -169,17 +168,17 @@ internal static class ProductMenuManager
                 switch (option)
                 {
                     case 1:
-                        Console.Write("Indique el nuevo nombre:");
-                        product.Name = Console.ReadLine();
+                        Console.Write("Indique el nuevo nombre: ");
+                        product.Name = InputHelper.GetNotNullString();
                         break;
                     case 2:
-                        Console.Write("Indique el nuevo precio:");
+                        Console.Write("Indique el nuevo precio: ");
                         product.Price = InputHelper.GetPositiveDecimal();
                         break;
                     case 3:
                         if (product is Menu menu)
                         {
-                            Console.Write("Indique el nuevo tiempo de cocción:");
+                            Console.Write("Indique el nuevo tiempo de cocción: ");
                             menu.TimeToCook = InputHelper.GetValidInt(1);
                         }
                         break;

@@ -22,7 +22,6 @@ namespace SistemaGestionMesas2.Repository
             _context.TableProduct.Add(tableProduct);
             _context.SaveChanges();
         }
-
         public void ChangeQuantity(int tableId, int productId, int quantity)
         {
             var tableProduct = _context.TableProduct
@@ -34,5 +33,18 @@ namespace SistemaGestionMesas2.Repository
                 _context.SaveChanges();
             }
         }
+        public void RemoveAllProductsFromTable(int tableId)
+        {
+            var tableProducts = _context.TableProduct
+                .Where(tp => tp.TableId == tableId)
+                .ToList();
+
+            if (tableProducts.Any())
+            {
+                _context.TableProduct.RemoveRange(tableProducts);
+                _context.SaveChanges();
+            }
+        }
+
     }
 }

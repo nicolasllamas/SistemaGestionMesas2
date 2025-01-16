@@ -28,9 +28,9 @@ public static class TableMenuManager
         Console.WriteLine("\nIndique que desea hacer:");
         Console.WriteLine("1. Agregar productos a una mesa");
         Console.WriteLine("2. Consultar las mesas");
-        Console.WriteLine("3. Modificar la cantidad de mesas");
-        Console.WriteLine("4. Cerrar y liberar una mesa");
-        Console.WriteLine("5. Salir");
+        Console.WriteLine("3. Cerrar y liberar una mesa");
+        Console.WriteLine("4. Modificar la cantidad de mesas");
+        Console.WriteLine("5. Volver al menu anterior");
 
         int option = InputHelper.GetValidInt(1, 5);
 
@@ -41,19 +41,21 @@ public static class TableMenuManager
                 Console.WriteLine("\nPresione cualquier tecla para continuar.");
                 Console.ReadKey();
                 break;
+
             case 2:
                 GetTablesOverview();
                 Console.WriteLine("\nPresione cualquier tecla para continuar.");
                 Console.ReadKey();
                 break;
+
             case 3:
-                ChangeAmountTable();
+                FinalizeTable();
                 Console.WriteLine("\nPresione cualquier tecla para continuar.");
                 Console.ReadKey();
                 break;
-            case 4:
-                // THIS ONE IS REMAINING TO BE IMPLEMENTED
 
+            case 4:
+                ChangeAmountTable();
                 Console.WriteLine("\nPresione cualquier tecla para continuar.");
                 Console.ReadKey();
                 break;
@@ -69,6 +71,7 @@ public static class TableMenuManager
 
         return isWorking;
     }
+
     public static bool AddProductToTable()
     {
         bool continueWorking = true;
@@ -177,22 +180,35 @@ public static class TableMenuManager
         Console.WriteLine(result);
 
     }
+
     public static void GetTablesOverview()
     {
-        //Display if the table is available or not
-        //In the future, it should also say the products in the table
-
         using (var context = new ApplicationDbContext())
         {
             var tables = new TableRepository(context).GetAllTables().ToList();
-
+            var allProduct = new ProductRepository(context).GetAllProducts().ToList();
+            
+            Console.WriteLine();
             if (tables.Any())
             {
-                foreach (var table in tables) { Console.WriteLine(table); }
+                foreach (var table in tables)
+                {
+                    if (table.TableProducts.Any())
+                    {
+                        Console.WriteLine($"La mesa {table.Id} posee los siguientes productos:");
+                        foreach (TableProduct tableProduct in table.TableProducts)
+                        {
+                            Console.WriteLine($"Producto: {tableProduct.Product.Name}, Cantidad: {tableProduct.Quantity}, Precio por unidad: ${allProduct.Find(x => x.Id == tableProduct.ProductId).Price:F2}");
+                        }
+                    }
+                    else { Console.WriteLine(table); }
+                    Console.WriteLine();
+                }
             }
             else { Console.WriteLine("No hay mesas en la base de datos."); }
         }
     }
+
     public static int SelectingProduct()
     {
         int highestId;
@@ -213,5 +229,53 @@ public static class TableMenuManager
             highestId = tableRepository.GetAllTables().Max(t => t.Id);
         }
         return InputHelper.GetValidInt(1, highestId);
+    }
+
+    public static void FinalizeTable()
+    {
+        Console.Write("Indique el ID de la mesa: ");
+        int selectedTable = SelectingTable();
+
+        Table table = null;
+        TableRepository tableRepository = null;
+        List<Product> allProduct = null;
+        using (var context = new ApplicationDbContext())
+        {
+            tableRepository = new TableRepository(context);
+            table = tableRepository.GetTableByIdWithProducts(selectedTable);
+            allProduct = new ProductRepository(context).GetAllProducts().ToList();
+        }
+        decimal amountToPay = 0;
+
+        if (table == null)
+        {
+            Console.WriteLine("Mesa no encontrada.");
+        }
+        else
+        {
+            Console.WriteLine($"La mesa {selectedTable} compró los siguientes productos:");
+
+            foreach (TableProduct tableProduct in table.TableProducts)
+            {
+                Console.WriteLine($"Producto: {tableProduct.Product.Name}, Cantidad: {tableProduct.Quantity}, Precio por unidad: ${allProduct.Find(x => x.Id == tableProduct.ProductId).Price:F2}");
+                amountToPay += tableProduct.Quantity * allProduct.Find(x => x.Id == tableProduct.ProductId).Price;
+            }
+            Console.WriteLine("\nEl total a pagar es: $" + amountToPay);
+            Console.WriteLine("¿Está seguro que desea liberar esta mesa?");
+            Console.WriteLine("1. Sí");
+            Console.WriteLine("2. No");
+            int option = InputHelper.GetValidInt(1, 2);
+
+            if (option == 1)
+            {
+                using (var context = new ApplicationDbContext())
+                {
+                    var tableProductRepository = new TableProductRepository(context);
+                    tableProductRepository.RemoveAllProductsFromTable(selectedTable);
+                }
+                Console.WriteLine("La mesa ha sido liberada.");
+            }
+            else { Console.WriteLine("Operación cancelada."); }
+        }
     }
 }

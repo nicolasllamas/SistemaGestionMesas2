@@ -32,5 +32,22 @@
             }
             return result;
         }
+
+        public static string GetNotNullString()
+        {
+            string result = null;
+
+            while (string.IsNullOrWhiteSpace(result))
+            {
+                result = Console.ReadLine();
+
+                if (string.IsNullOrWhiteSpace(result))
+                {
+                    Console.WriteLine("Indique un valor valido");
+                }
+            }
+
+            return result;
+        }
     }
 }
